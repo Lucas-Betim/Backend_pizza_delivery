@@ -1,8 +1,8 @@
 from fastapi import APIRouter, Depends, HTTPException
 from models import Usuario 
-from dependecies import pegar_sessao, verificar_token
+from dependecies import pegar_sessao, verificar_token, verificar_admin
 from main import bcrypt_context, ALGORITHM, ACCESS_TOKEN_EXPIRE_MINUTES, SECRET_KEY
-from schemas import UsuarioSchema, LoginSchema
+from schemas import UsuarioSchema, LoginSchema, AdminSchema
 from sqlalchemy.orm import Session
 from jose import jwt, JWTError
 from datetime import datetime, timedelta, timezone
@@ -10,6 +10,46 @@ from fastapi.security import OAuth2PasswordRequestForm
 
 
 auth_router = APIRouter(prefix="/auth", tags=["auth"])
+
+
+@auth_router.post("/criar_admin", status_code=201)
+async def criar_admin(
+    usuario_schema: AdminSchema,
+    session: Session = Depends(pegar_sessao),
+    admin_atual: Usuario = Depends(verificar_admin),
+):
+    usuario_existente = (
+        session.query(Usuario)
+        .filter(Usuario.email == usuario_schema.email)
+        .first()
+    )
+
+    if usuario_existente:
+        raise HTTPException(
+            status_code=409,
+            detail="Já existe um usuário com esse email",
+        )
+
+    novo_admin = Usuario(
+        nome=usuario_schema.nome,
+        email=usuario_schema.email,
+        senha=bcrypt_context.hash(usuario_schema.senha),
+        ativo=True,
+        admin=True,
+    )
+
+    session.add(novo_admin)
+    session.commit()
+    session.refresh(novo_admin)
+
+    return {
+        "mensagem": "Administrador cadastrado com sucesso",
+        "id": novo_admin.id,
+        "criado_por": admin_atual.id,
+    }
+
+
+
 
 
 def criar_token(id_usuario, duracao_token=timedelta(ACCESS_TOKEN_EXPIRE_MINUTES)):
@@ -47,7 +87,7 @@ async def criar_conta(usuario_schema: UsuarioSchema, session = Depends(pegar_ses
         raise HTTPException(status_code=400, detail="Já existe um usuário com esse email")
     else:
         senha_criptografada = bcrypt_context.hash(usuario_schema.senha)
-        novo_usuario = Usuario(usuario_schema.nome, usuario_schema.email, senha_criptografada, usuario_schema.ativo, usuario_schema.admin)
+        novo_usuario = Usuario(usuario_schema.nome, usuario_schema.email, senha_criptografada, ativo=True, admin=False)
         session.add(novo_usuario)
         session.commit()
         return {"mensagem": f"usuario cadastrado com sucesso {usuario_schema.email}"}

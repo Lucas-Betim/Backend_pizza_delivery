@@ -25,3 +25,20 @@ def verificar_token(token: str = Depends(oauth2_scheme), session: Session = Depe
     if not usuario:
         raise HTTPException(status_code=401, detail="Acesso inválido")
     return usuario
+
+def verificar_admin(
+    usuario: Usuario = Depends(verificar_token),
+) -> Usuario:
+    if not usuario.ativo:
+        raise HTTPException(
+            status_code=403,
+            detail="Usuário inativo",
+        )
+
+    if not usuario.admin:
+        raise HTTPException(
+            status_code=403,
+            detail="Apenas administradores podem executar esta operação",
+        )
+
+    return usuario

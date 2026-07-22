@@ -6,12 +6,17 @@ class UsuarioSchema(BaseModel):
     nome: str
     email: str
     senha: str
-    ativo: Optional[bool]
-    admin: Optional[bool]
 
     class config:
         from_attributes = True
 
+class AdminSchema(BaseModel):
+    nome: str
+    email: str
+    senha: str
+
+    class config:
+        from_attributes = True
 
 class PedidoSchema(BaseModel):
     id_usuario: int
