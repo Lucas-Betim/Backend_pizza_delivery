@@ -1,11 +1,16 @@
 from sqlalchemy import create_engine, Column, String, Integer, Boolean, Float, ForeignKey
 from sqlalchemy.orm import declarative_base, relationship
 from sqlalchemy_utils import ChoiceType 
+import os
 
+DATABASE_URL = os.getenv("DATABASE_URL", "sqlite:///banco.db")
 
-
+db = create_engine(
+    DATABASE_URL,
+    pool_pre_ping=True,
+)
 # cria conexão do seu banco
-db = create_engine("sqlite:///banco.db")
+# db = create_engine("sqlite:///banco.db")
 
 # cria a base do banco de dados
 Base = declarative_base()
