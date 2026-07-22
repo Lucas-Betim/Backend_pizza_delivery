@@ -21,8 +21,6 @@ from order_routes import order_router
 app.include_router(auth_router)
 app.include_router(order_router)
 
-# para rodar o nosso código, executar no terminal: uvicorn main:app --reload
-
 # endpoint:
 # /ordens
 
@@ -32,3 +30,6 @@ app.include_router(order_router)
 # Put/Patch -> edição
 # Delete -> deletar
 
+# Rodar o projeto
+# cd D:\Projeto_fastapi\Backend_pizza_delivery
+# python -m uvicorn main:app --reload
