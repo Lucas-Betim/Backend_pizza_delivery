@@ -1,4 +1,4 @@
-from pydantic import BaseModel
+from pydantic import BaseModel, Field
 from typing import Optional, List
 
 
@@ -32,19 +32,27 @@ class LoginSchema(BaseModel):
         from_attributes = True
 
 class ItemPedidoSchema(BaseModel):
+    quantidade: int = Field(gt=0)
+    sabor: str
+    tamanho: str
+
+    class Config:
+        from_attributes = True
+
+class ItemPedidoResponseSchema(BaseModel):
     quantidade: int
     sabor: str
     tamanho: str
     preco_unitario: float
 
-    class config:
+    class Config:
         from_attributes = True
 
 class ResponsePedidoSchema(BaseModel):
     id: int
     status: str
     preco: float
-    itens: List[ItemPedidoSchema]
+    itens: List[ItemPedidoResponseSchema]
 
-    class config:
+    class Config:
         from_attributes = True
